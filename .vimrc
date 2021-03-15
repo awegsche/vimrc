@@ -1,6 +1,9 @@
 " vim:fdm=marker
 " -{{{---- filetypes
 "
+"
+set hidden
+
 filetype plugin on
 
 syntax on
