@@ -28,7 +28,14 @@ set guioptions-=m
 set guioptions-=T
 set guioptions-=r
 set guioptions-=L
-set guifont=Ubuntu\ Mono\ 12
+if has('linux')
+    set guifont=Ubuntu\ Mono:h14
+endif
+if has('win32')
+    "set guifont=Consolas:h18
+    " set guifont=JetBrains\ Mono:h16
+    set guifont=Fira\ Code:h16
+endif
 
 
 set omnifunc=syntaxcomplete#Complete
@@ -37,6 +44,14 @@ set omnifunc=syntaxcomplete#Complete
 "nnoremap <C-K> <C-W><C-K>
 "nnoremap <C-L> <C-W><C-L>
 "nnoremap <C-H> <C-W><C-H>
+"
+"
+" -----------------------------------------------------------------------------------------------}}}
+" -{{{---- windows ---------------------------------------------------------------------------------
+" --------------------------------------------------------------------------------------------------
+if has('win32')
+    "set shell=powershell.exe
+endif
 
 " -----------------------------------------------------------------------------------------------}}}
 " -{{{---- C++ projects ----------------------------------------------------------------------------
@@ -64,14 +79,14 @@ Plugin 'gmarik/Vundle.vim'
 " Add all your plugins here (note older versions of Vundle used Bundle instead of Plugin)
 
 Plugin 'vim-scripts/indentpython.vim'
-"Plugin 'Valloric/YouCompleteMe'
-Plugin 'maralla/completor.vim'
+"Plugin 'ycm-core/YouCompleteMe'
+"Plugin 'maralla/completor.vim'
 Plugin 'jnurmine/Zenburn'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'
 
 " Syntax checkers
-"Plugin 'scrooloose/syntastic'
+Plugin 'scrooloose/syntastic'
 Plugin 'w0rp/ale'
 
 Plugin 'nvie/vim-flake8'
@@ -93,12 +108,21 @@ Plugin 'benburrill/potato-colors'
 Plugin 'szorfein/fantasy.vim'
 Plugin 'jaredgorski/SpaceCamp'
 Plugin 'flrnprz/plastic.vim'
+Plugin 'franbach/miramare'
+Plugin 'dfrunza/vim'
+Plugin 'sainnhe/gruvbox-material'
 
 
 " rust
 Plugin 'rust-lang/rust.vim'
-Plugin 'racer-rust/vim-racer'
+" Plugin 'racer-rust/vim-racer'
 Plugin 'rust-lang-nursery/rustfmt'
+"Plugin 'neoclide/coc.nvim'
+Plugin 'neovim/nvim-lspconfig'
+Plugin 'nvim-lua/lsp_extensions.nvim'
+Plugin 'nvim-lua/completion-nvim'
+Plugin 'mhinz/vim-crates'
+
 
 " c++
 "Plugin 'octol/vim-cpp-enhanced-highlight'
@@ -119,9 +143,9 @@ Plugin 'rust-lang-nursery/rustfmt'
 "
 Plugin 'Shougo/vimproc.vim'
 Plugin 'idanarye/vim-vebugger'
-Plugin 'ludovicchabant/vim-gutentags'
-Plugin 'abudden/taghighlight-automirror'
-Plugin 'autozimu/LanguageClient-neovim'
+"Plugin 'ludovicchabant/vim-gutentags'
+"Plugin 'abudden/taghighlight-automirror'
+"Plugin 'autozimu/LanguageClient-neovim'
 
 Plugin 'kshenoy/vim-signature'
 
@@ -153,8 +177,14 @@ let python_highlight_all=1
 " -{{{---- Appearance ------------------------------------------------------------------------------
 " --------------------------------------------------------------------------------------------------
 
+set termguicolors
 set background=dark
-colorscheme snow
+"colorscheme snow
+let g:miramare_enable_italic=1
+let g:miramare_disable_italic_comment=1
+"colorscheme miramare
+let g:gruvbox_material_background = 'soft'
+colorscheme gruvbox-material
 
 set colorcolumn=101
 highlight ColorColumn ctermbg=236
@@ -176,7 +206,7 @@ set foldlevel=99
 nnoremap <space> za
 let g:SimpylFold_docstring_preview=1
 
-let g:cym_rust_src_path = '/home/awegsche/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src'
+let g:cym_rust_src_path = '/mnt/c/Users/andiw/.rustup/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust/src'
 
 let termwinsize = 20
 
@@ -197,6 +227,95 @@ au BufRead,BufNewFile *
             \ let b:marker_open='<+' |
             \ let b:marker_close='+>'
 
+" -----------------------------------------------------------------------------------------------}}}
+" -{{{---- Rust ------------------------------------------------------------------------------------
+" --------------------------------------------------------------------------------------------------
+"
+"
+" Set completeopt to have a better completion experience
+" :help completeopt
+" menuone: popup even when there's only one match
+" noinsert: Do not insert text until a selection is made
+" noselect: Do not select, force user to select one from the menu
+set completeopt=menuone,noinsert,noselect
+
+" Avoid showing extra messages when using completion
+set shortmess+=c
+
+" Configure LSP
+" https://github.com/neovim/nvim-lspconfig#rust_analyzer
+lua <<EOF
+
+-- nvim_lsp object
+local nvim_lsp = require'lspconfig'
+
+-- function to attach completion when setting up lsp
+local on_attach = function(client)
+    require'completion'.on_attach(client)
+end
+
+-- Enable rust_analyzer
+nvim_lsp.rust_analyzer.setup({ on_attach=on_attach })
+
+-- Enable diagnostics
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+  vim.lsp.diagnostic.on_publish_diagnostics, {
+    virtual_text = true,
+    signs = true,
+    update_in_insert = true,
+  }
+)
+EOF
+
+" Code navigation shortcuts
+nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap <silent> K     <cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap <silent> gD    <cmd>lua vim.lsp.buf.implementation()<CR>
+nnoremap <silent> <c-k> <cmd>lua vim.lsp.buf.signature_help()<CR>
+nnoremap <silent> 1gD   <cmd>lua vim.lsp.buf.type_definition()<CR>
+nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
+nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
+nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
+nnoremap <silent> gd    <cmd>lua vim.lsp.buf.declaration()<CR>
+nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
+
+" Use <Tab> and <S-Tab> to navigate through popup menu
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+" use <Tab> as trigger keys
+imap <Tab> <Plug>(completion_smart_tab)
+imap <S-Tab> <Plug>(completion_smart_s_tab)
+
+" Set updatetime for CursorHold
+" 300ms of no cursor movement to trigger CursorHold
+set updatetime=300
+" Show diagnostic popup on cursor hold
+autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics()
+
+" Goto previous/next diagnostic warning/error
+nnoremap <silent> g[ <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
+nnoremap <silent> g] <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
+
+
+" have a fixed column for the diagnostics to appear in
+" this removes the jitter when warnings/errors flow in
+set signcolumn=yes
+
+" Enable type inlay hints
+autocmd CursorMoved,InsertLeave,BufEnter,BufWinEnter,TabEnter,BufWritePost *
+\ lua require'lsp_extensions'.inlay_hints{ prefix = '', highlight = "InlayHint", enabled = {"TypeHint", "ChainingHint", "ParameterHint"} }
+
+hi InlayHint gui=italic guifg=Gray cterm=italic ctermfg=Gray
+"let g:ycm_language_server =
+"            \ [
+"            \  {
+"            \   'name': 'rust',
+"            \   'cmdline': [rust-analyzer'],
+"            \   'filetypes': ['rust'],
+"            \   'project_root_files': ['Cargo.toml']
+"            \  }
+"            \ ]
 
 " -----------------------------------------------------------------------------------------------}}}
 " -{{{---- FORTRAN ---------------------------------------------------------------------------------
