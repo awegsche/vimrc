@@ -80,14 +80,16 @@ Plugin 'gmarik/Vundle.vim'
 
 Plugin 'vim-scripts/indentpython.vim'
 "Plugin 'ycm-core/YouCompleteMe'
+Plugin 'dense-analysis/ale'
 "Plugin 'maralla/completor.vim'
 Plugin 'jnurmine/Zenburn'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'
 
 " Syntax checkers
-Plugin 'scrooloose/syntastic'
-Plugin 'w0rp/ale'
+"Plugin 'sheerun/vim-polyglot'
+"Plugin 'scrooloose/syntastic'
+"Plugin 'w0rp/ale'
 
 Plugin 'nvie/vim-flake8'
 "Plugin 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
@@ -117,38 +119,29 @@ Plugin 'sainnhe/gruvbox-material'
 Plugin 'rust-lang/rust.vim'
 " Plugin 'racer-rust/vim-racer'
 Plugin 'rust-lang-nursery/rustfmt'
-"Plugin 'neoclide/coc.nvim'
+Plugin 'neoclide/coc.nvim'
+"
 Plugin 'neovim/nvim-lspconfig'
 Plugin 'nvim-lua/lsp_extensions.nvim'
 Plugin 'nvim-lua/completion-nvim'
+
 Plugin 'mhinz/vim-crates'
 
 
 " c++
-"Plugin 'octol/vim-cpp-enhanced-highlight'
-"Plugin 'Rip-Rip/clang_complete'
-"Plugin 'LucHermitte/lh-vim-lib'
-"Plugin 'LucHermitte/lh-style'
-"Plugin 'LucHermitte/lh-tags'
-"Plugin 'LucHermitte/lh-dev'
-"Plugin 'awegsche/lh-brackets'
-"Plugin 'LucHermitte/searchInRuntime'
-"Plugin 'LucHermitte/mu-template'
-"Plugin 'tomtom/stakeholders_vim'
-"Plugin 'LucHermitte/alternate-lite'
-"Plugin 'LucHermitte/lh-cpp'
-"Plugin 'vim-scripts/genutils'
-"Plugin 'albfan/vim-breakpts'
-"Plugin 'LucHermitte/local_vimrc'
+"Plugin 'neoclide/coc.nvim', {'branch': 'release'}
 "
 Plugin 'Shougo/vimproc.vim'
 Plugin 'idanarye/vim-vebugger'
+Plugin 'vim-scripts/DoxygenToolkit.vim'
 "Plugin 'ludovicchabant/vim-gutentags'
 "Plugin 'abudden/taghighlight-automirror'
 "Plugin 'autozimu/LanguageClient-neovim'
 
 Plugin 'kshenoy/vim-signature'
 
+Plugin 'lervag/vimtex'
+Plugin 'vim-latex/vim-latex' 
 
 
 " All of your Plugins must be added before the following line
@@ -223,6 +216,8 @@ let g:cpp_experimental_template_highlight = 1
 let g:cpp_concepts_highlight = 1
 let g:vebugger_leader="\\"
 
+let g:DoxygenToolkit_commentType = "C++"
+
 au BufRead,BufNewFile *
             \ let b:marker_open='<+' |
             \ let b:marker_close='+>'
@@ -244,28 +239,30 @@ set shortmess+=c
 
 " Configure LSP
 " https://github.com/neovim/nvim-lspconfig#rust_analyzer
-lua <<EOF
 
--- nvim_lsp object
-local nvim_lsp = require'lspconfig'
-
--- function to attach completion when setting up lsp
-local on_attach = function(client)
-    require'completion'.on_attach(client)
-end
-
--- Enable rust_analyzer
-nvim_lsp.rust_analyzer.setup({ on_attach=on_attach })
-
--- Enable diagnostics
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics, {
-    virtual_text = true,
-    signs = true,
-    update_in_insert = true,
-  }
-)
-EOF
+"lua <<EOF
+"
+"-- nvim_lsp object
+"local nvim_lsp = require'lspconfig'
+"
+"-- function to attach completion when setting up lsp
+"local on_attach = function(client)
+"    require'completion'.on_attach(client)
+"end
+"
+"-- Enable rust_analyzer
+"nvim_lsp.rust_analyzer.setup({ on_attach=on_attach })
+"nvim_lsp.clangd.setup({on_attach=on_attach})
+"
+"-- Enable diagnostics
+"vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+"  vim.lsp.diagnostic.on_publish_diagnostics, {
+"    virtual_text = true,
+"    signs = true,
+"    update_in_insert = true,
+"  }
+")
+"EOF
 
 " Code navigation shortcuts
 nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
