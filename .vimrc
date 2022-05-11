@@ -78,9 +78,17 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 
-" Add all your plugins here (note older versions of Vundle used Bundle instead of Plugin)
+"-- Vim itself
+Plugin 'ciaranm/securemodelines'
+Plugin 'itchyny/lightline.vim'
+Plugin 'machakann/vim-highlightedyank'
 
-"Plugin 'ycm-core/YouCompleteMe'
+
+"-- Fuzzy finder
+Plugin 'airblade/vim-rooter'
+Plugin 'junegunn/fzf', {'dir': '~./fzf', 'do': './install --all'}
+Plugin 'junegunn/fzf.vim'
+
 Plugin 'dense-analysis/ale'
 "Plugin 'maralla/completor.vim'
 Plugin 'jnurmine/Zenburn'
@@ -97,7 +105,6 @@ Plugin 'vim-pandoc/vim-pandoc-syntax'
 
 
 
-Plugin 'vim-airline/vim-airline'
 "Plugin 'kien/ctrlp.vim'
 Plugin 'tmhedberg/SimpylFold'
 Plugin 'tpope/vim-fugitive'
@@ -118,23 +125,35 @@ Plugin 'franbach/miramare'
 Plugin 'dfrunza/vim'
 Plugin 'sainnhe/gruvbox-material'
 
+" programming support
+Plugin 'neovim/nvim-lspconfig'
+Plugin 'nvim-lua/lsp_extensions.nvim'
+"Plugin 'nvim-lua/completion-nvim'
+Plugin 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
+Plugin 'hrsh7th/cmp-buffer', {'branch': 'main'}
+Plugin 'hrsh7th/cmp-path', {'branch': 'main'}
+Plugin 'hrsh7th/nvim-cmp', {'branch': 'main'}
+Plugin 'ray-x/lsp_signature.nvim'
+
+" Only because nvim-cmp _requires_ snippets
+Plugin 'hrsh7th/cmp-vsnip', {'branch': 'main'}
+Plugin 'hrsh7th/vim-vsnip'
+
+" Syntactic language support
+Plugin 'cespare/vim-toml'
+Plugin 'stephpy/vim-yaml'
+Plugin 'rust-lang/rust.vim'
+Plugin 'rhysd/vim-clang-format'
+"Plugin 'fatih/vim-go'
+Plugin 'dag/vim-fish'
+Plugin 'godlygeek/tabular'
+Plugin 'plasticboy/vim-markdown'
+
 " python
 Plugin 'nvie/vim-flake8'
 Plugin 'vim-scripts/indentpython.vim'
-Plugin 'pappasam/coc-jedi', { 'do': 'yarn install --frozen-lockfile && yarn build' }
+"Plugin 'pappasam/coc-jedi', { 'do': 'yarn install --frozen-lockfile && yarn build' }
 
-
-" rust
-Plugin 'rust-lang/rust.vim'
-Plugin 'cespare/vim-toml'
-" Plugin 'racer-rust/vim-racer'
-Plugin 'fannheyward/coc-rust-analyzer'
-Plugin 'rust-lang-nursery/rustfmt'
-Plugin 'neoclide/coc.nvim'
-"
-Plugin 'neovim/nvim-lspconfig'
-Plugin 'nvim-lua/lsp_extensions.nvim'
-Plugin 'nvim-lua/completion-nvim'
 
 Plugin 'mhinz/vim-crates'
 
@@ -243,6 +262,8 @@ set shortmess+=c
 
 " Configure LSP
 " https://github.com/neovim/nvim-lspconfig#rust_analyzer
+"
+
 
 "lua <<EOF
 "
@@ -267,6 +288,149 @@ set shortmess+=c
 "  }
 ")
 "EOF
+lua << END
+local cmp = require'cmp'
+
+local lspconfig = require'lspconfig'
+cmp.setup({
+  snippet = {
+    -- REQUIRED by nvim-cmp. get rid of it once we can
+    expand = function(args)
+      vim.fn["vsnip#anonymous"](args.body)
+    end,
+  },
+  mapping = {
+    -- Tab immediately completes. C-n/C-p to select.
+    ['<Tab>'] = cmp.mapping.confirm({ select = true })
+  },
+  sources = cmp.config.sources({
+    -- TODO: currently snippets from lsp end up getting prioritized -- stop that!
+    { name = 'nvim_lsp' },
+  }, {
+    { name = 'path' },
+  }),
+  experimental = {
+    ghost_text = true,
+  },
+})
+
+-- Enable completing paths in :
+cmp.setup.cmdline(':', {
+  sources = cmp.config.sources({
+    { name = 'path' }
+  })
+})
+
+-- Setup lspconfig.
+local on_attach = function(client, bufnr)
+  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+  --Enable completion triggered by <c-x><c-o>
+  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+  -- Mappings.
+  local opts = { noremap=true, silent=true }
+
+  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', '<space>r', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', '<space>a', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+  buf_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+  buf_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+  buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.set_loclist()<CR>', opts)
+  buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+
+  -- Get signatures (and _only_ signatures) when in argument lists.
+  require "lsp_signature".on_attach({
+    doc_lines = 0,
+    handler_opts = {
+      border = "none"
+    },
+  })
+end
+
+local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+lspconfig.rust_analyzer.setup {
+  on_attach = on_attach,
+  flags = {
+    debounce_text_changes = 150,
+  },
+  settings = {
+    ["rust-analyzer"] = {
+      cargo = {
+        allFeatures = true,
+      },
+      completion = {
+	postfix = {
+	  enable = false,
+	},
+      },
+    },
+  },
+  capabilities = capabilities,
+}
+
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+  vim.lsp.diagnostic.on_publish_diagnostics, {
+    virtual_text = true,
+    signs = true,
+    update_in_insert = true,
+  }
+)
+END
+
+" Enable type inlay hints
+autocmd CursorHold,CursorHoldI *.rs :lua require'lsp_extensions'.inlay_hints{ only_current_line = true }
+
+" Plugin settings
+let g:secure_modelines_allowed_items = [
+                \ "textwidth",   "tw",
+                \ "softtabstop", "sts",
+                \ "tabstop",     "ts",
+                \ "shiftwidth",  "sw",
+                \ "expandtab",   "et",   "noexpandtab", "noet",
+                \ "filetype",    "ft",
+                \ "foldmethod",  "fdm",
+                \ "readonly",    "ro",   "noreadonly", "noro",
+                \ "rightleft",   "rl",   "norightleft", "norl",
+                \ "colorcolumn"
+                \ ]
+
+" Lightline
+let g:lightline = {
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'readonly', 'filename', 'modified' ] ],
+      \   'right': [ [ 'lineinfo' ],
+      \              [ 'percent' ],
+      \              [ 'fileencoding', 'filetype' ] ],
+      \ },
+      \ 'component_function': {
+      \   'filename': 'LightlineFilename'
+      \ },
+      \ }
+function! LightlineFilename()
+  return expand('%:t') !=# '' ? @% : '[No Name]'
+endfunction
+
+" Completion
+" Better completion
+" menuone: popup even when there's only one match
+" noinsert: Do not insert text until a selection is made
+" noselect: Do not select, force user to select one from the menu
+set completeopt=menuone,noinsert,noselect
+" Better display for messages
+set cmdheight=2
+" You will have bad experience for diagnostic messages when it's default 4000.
+set updatetime=300
 
 " Code navigation shortcuts
 nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
@@ -292,7 +456,7 @@ imap <S-Tab> <Plug>(completion_smart_s_tab)
 " 300ms of no cursor movement to trigger CursorHold
 set updatetime=100
 " Show diagnostic popup on cursor hold
-autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics()
+"autocmd CursorHold * lua vim.lsp.diagnostic.open_float()
 
 " Goto previous/next diagnostic warning/error
 nnoremap <silent> g[ <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
@@ -302,10 +466,6 @@ nnoremap <silent> g] <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
 " have a fixed column for the diagnostics to appear in
 " this removes the jitter when warnings/errors flow in
 set signcolumn=yes
-
-" Enable type inlay hints
-autocmd CursorMoved,InsertLeave,BufEnter,BufWinEnter,TabEnter,BufWritePost *
-\ lua require'lsp_extensions'.inlay_hints{ prefix = '', highlight = "InlayHint", enabled = {"TypeHint", "ChainingHint", "ParameterHint"} }
 
 hi InlayHint gui=italic guifg=Gray cterm=italic ctermfg=Gray
 "let g:ycm_language_server =
