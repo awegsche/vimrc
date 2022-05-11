@@ -28,13 +28,15 @@ set guioptions-=m
 set guioptions-=T
 set guioptions-=r
 set guioptions-=L
+" ->
+set guifont=Fira\ Code:h12
 if has('linux')
-    set guifont=Ubuntu\ Mono:h14
+    set guifont=Fira\ Code:h2
 endif
 if has('win32')
     "set guifont=Consolas:h18
     " set guifont=JetBrains\ Mono:h16
-    set guifont=Fira\ Code:h16
+    set guifont=Fira\ Code:h10
 endif
 
 
@@ -59,8 +61,8 @@ endif
 
 set exrc
 set secure
-let g:completor_clang_binary = '/usr/bin/clang'
-let g:clang_library_path = '/usr/local/lib/clang/8.0.0/lib/linux/'
+"let g:completor_clang_binary = '/usr/bin/clang'
+"let g:clang_library_path = '/usr/local/lib/clang/8.0.0/lib/linux/'
 
 " -----------------------------------------------------------------------------------------------}}}
 " -{{{---- Plugin Installation ---------------------------------------------------------------------
@@ -78,21 +80,23 @@ Plugin 'gmarik/Vundle.vim'
 
 " Add all your plugins here (note older versions of Vundle used Bundle instead of Plugin)
 
-Plugin 'vim-scripts/indentpython.vim'
 "Plugin 'ycm-core/YouCompleteMe'
 Plugin 'dense-analysis/ale'
 "Plugin 'maralla/completor.vim'
 Plugin 'jnurmine/Zenburn'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'
+Plugin 'jceb/vim-orgmode'
+Plugin 'vim-pandoc/vim-pandoc'
+Plugin 'vim-pandoc/vim-pandoc-syntax'
 
 " Syntax checkers
 "Plugin 'sheerun/vim-polyglot'
 "Plugin 'scrooloose/syntastic'
 "Plugin 'w0rp/ale'
 
-Plugin 'nvie/vim-flake8'
-"Plugin 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+
+
 Plugin 'vim-airline/vim-airline'
 "Plugin 'kien/ctrlp.vim'
 Plugin 'tmhedberg/SimpylFold'
@@ -114,10 +118,17 @@ Plugin 'franbach/miramare'
 Plugin 'dfrunza/vim'
 Plugin 'sainnhe/gruvbox-material'
 
+" python
+Plugin 'nvie/vim-flake8'
+Plugin 'vim-scripts/indentpython.vim'
+Plugin 'pappasam/coc-jedi', { 'do': 'yarn install --frozen-lockfile && yarn build' }
+
 
 " rust
 Plugin 'rust-lang/rust.vim'
+Plugin 'cespare/vim-toml'
 " Plugin 'racer-rust/vim-racer'
+Plugin 'fannheyward/coc-rust-analyzer'
 Plugin 'rust-lang-nursery/rustfmt'
 Plugin 'neoclide/coc.nvim'
 "
@@ -134,6 +145,7 @@ Plugin 'mhinz/vim-crates'
 Plugin 'Shougo/vimproc.vim'
 Plugin 'idanarye/vim-vebugger'
 Plugin 'vim-scripts/DoxygenToolkit.vim'
+Plugin 'jackguo380/vim-lsp-cxx-highlight'
 "Plugin 'ludovicchabant/vim-gutentags'
 "Plugin 'abudden/taghighlight-automirror'
 "Plugin 'autozimu/LanguageClient-neovim'
@@ -154,14 +166,6 @@ filetype plugin indent on    " required
 " --------------------------------------------------------------------------------------------------
 
 "python with virtualenv support
-python << EOF
-import os
-import sys
-if 'VIRTUAL_ENV' in os.environ:
-  project_base_dir = os.environ['VIRTUAL_ENV']
-  activate_this = os.path.join(project_base_dir, 'bin/activate_this.py')
-  execfile(activate_this, dict(__file__=activate_this))
-EOF
 
 let python_highlight_all=1
 
@@ -286,7 +290,7 @@ imap <S-Tab> <Plug>(completion_smart_s_tab)
 
 " Set updatetime for CursorHold
 " 300ms of no cursor movement to trigger CursorHold
-set updatetime=300
+set updatetime=100
 " Show diagnostic popup on cursor hold
 autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics()
 
