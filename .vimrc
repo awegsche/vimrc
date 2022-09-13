@@ -97,7 +97,7 @@ Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'jceb/vim-orgmode'
 Plugin 'vim-pandoc/vim-pandoc'
 Plugin 'vim-pandoc/vim-pandoc-syntax'
-Plugin 'oberblastmeister/neuron.nvim'
+" Plugin 'oberblastmeister/neuron.nvim'
 Plugin 'nvim-telescope/telescope.nvim'
 
 " -------- Programming support ---------------------------------------------------------------------
