@@ -68,28 +68,30 @@ set secure
 " -{{{---- Plugin Installation ---------------------------------------------------------------------
 " --------------------------------------------------------------------------------------------------
 
+" -------- Setup Vundle ----------------------------------------------------------------------------
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
-" alternatively, pass a path where Vundle should install plugins
-"call vundle#begin('~/some/path/here')
-
 " let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 
-"-- Vim itself
+" -------- Vim itself ------------------------------------------------------------------------------
 Plugin 'ciaranm/securemodelines'
 Plugin 'itchyny/lightline.vim'
 Plugin 'machakann/vim-highlightedyank'
+Plugin 'michaelb/sniprun', {'do': 'bash install.sh'}
 
 
-"-- Fuzzy finder
-Plugin 'airblade/vim-rooter'
+" -------- Fuzzy finder ----------------------------------------------------------------------------
+"  note: vim-rooter occasionally messes up project root dirs
+"Plugin 'airblade/vim-rooter'
+"
 Plugin 'junegunn/fzf', {'dir': '~./fzf', 'do': './install --all'}
 Plugin 'junegunn/fzf.vim'
 
-Plugin 'dense-analysis/ale'
+" -------- Structure and Organisation --------------------------------------------------------------
+"Plugin 'dense-analysis/ale'
 "Plugin 'maralla/completor.vim'
 Plugin 'jnurmine/Zenburn'
 Plugin 'scrooloose/nerdtree'
@@ -98,18 +100,48 @@ Plugin 'jceb/vim-orgmode'
 Plugin 'vim-pandoc/vim-pandoc'
 Plugin 'vim-pandoc/vim-pandoc-syntax'
 
-" Syntax checkers
-"Plugin 'sheerun/vim-polyglot'
+" -------- Programming support ---------------------------------------------------------------------
 "Plugin 'scrooloose/syntastic'
 "Plugin 'w0rp/ale'
-
-
-
-"Plugin 'kien/ctrlp.vim'
 Plugin 'tmhedberg/SimpylFold'
 Plugin 'tpope/vim-fugitive'
+Plugin 'neovim/nvim-lspconfig'
+Plugin 'nvim-lua/lsp_extensions.nvim'
+"Plugin 'nvim-lua/completion-nvim'
+Plugin 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
+Plugin 'hrsh7th/cmp-buffer', {'branch': 'main'}
+Plugin 'hrsh7th/cmp-path', {'branch': 'main'}
+Plugin 'hrsh7th/nvim-cmp', {'branch': 'main'}
+Plugin 'ray-x/lsp_signature.nvim'
 
-" Colorschemes
+" Only because nvim-cmp _requires_ snippets
+Plugin 'hrsh7th/cmp-vsnip', {'branch': 'main'}
+Plugin 'hrsh7th/vim-vsnip'
+
+" -------- Syntax --------------------------------
+"  general
+Plugin 'sheerun/vim-polyglot'
+Plugin 'stephpy/vim-yaml'
+Plugin 'dag/vim-fish'
+Plugin 'godlygeek/tabular'
+Plugin 'plasticboy/vim-markdown'
+" rust
+Plugin 'cespare/vim-toml'
+Plugin 'rust-lang/rust.vim'
+Plugin 'mhinz/vim-crates'
+" python
+Plugin 'nvie/vim-flake8'
+Plugin 'vim-scripts/indentpython.vim'
+" c/c++
+Plugin 'rhysd/vim-clang-format'
+
+Plugin 'kshenoy/vim-signature'
+
+" -------- Latex ---------------------------------
+Plugin 'lervag/vimtex'
+Plugin 'vim-latex/vim-latex' 
+
+" -------- Colorschemes ----------------------------------------------------------------------------
 "Plugin 'rafi/awesome-vim-colorschemes'
 Plugin 'yuttie/inkstained-vim'
 Plugin 'flazz/vim-colorschemes'
@@ -125,57 +157,9 @@ Plugin 'franbach/miramare'
 Plugin 'dfrunza/vim'
 Plugin 'sainnhe/gruvbox-material'
 
-" programming support
-Plugin 'neovim/nvim-lspconfig'
-Plugin 'nvim-lua/lsp_extensions.nvim'
-"Plugin 'nvim-lua/completion-nvim'
-Plugin 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
-Plugin 'hrsh7th/cmp-buffer', {'branch': 'main'}
-Plugin 'hrsh7th/cmp-path', {'branch': 'main'}
-Plugin 'hrsh7th/nvim-cmp', {'branch': 'main'}
-Plugin 'ray-x/lsp_signature.nvim'
 
-" Only because nvim-cmp _requires_ snippets
-Plugin 'hrsh7th/cmp-vsnip', {'branch': 'main'}
-Plugin 'hrsh7th/vim-vsnip'
+" -------- End Vundlde -----------------------------------------------------------------------------
 
-" Syntactic language support
-Plugin 'cespare/vim-toml'
-Plugin 'stephpy/vim-yaml'
-Plugin 'rust-lang/rust.vim'
-Plugin 'rhysd/vim-clang-format'
-"Plugin 'fatih/vim-go'
-Plugin 'dag/vim-fish'
-Plugin 'godlygeek/tabular'
-Plugin 'plasticboy/vim-markdown'
-
-" python
-Plugin 'nvie/vim-flake8'
-Plugin 'vim-scripts/indentpython.vim'
-"Plugin 'pappasam/coc-jedi', { 'do': 'yarn install --frozen-lockfile && yarn build' }
-
-
-Plugin 'mhinz/vim-crates'
-
-
-" c++
-"Plugin 'neoclide/coc.nvim', {'branch': 'release'}
-"
-Plugin 'Shougo/vimproc.vim'
-Plugin 'idanarye/vim-vebugger'
-Plugin 'vim-scripts/DoxygenToolkit.vim'
-Plugin 'jackguo380/vim-lsp-cxx-highlight'
-"Plugin 'ludovicchabant/vim-gutentags'
-"Plugin 'abudden/taghighlight-automirror'
-"Plugin 'autozimu/LanguageClient-neovim'
-
-Plugin 'kshenoy/vim-signature'
-
-Plugin 'lervag/vimtex'
-Plugin 'vim-latex/vim-latex' 
-
-
-" All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 
@@ -228,98 +212,19 @@ let termwinsize = 20
 
 nnoremap <C-F8> :botright split <CR> :resize 20 <CR> :terminal ++curwin <CR>
 
-" -----------------------------------------------------------------------------------------------}}}
-" -{{{---- C++ -------------------------------------------------------------------------------------
-" --------------------------------------------------------------------------------------------------
-"
-let g:cpp_class_scope_highlight = 1
-let g:cpp_member_variable_highlight = 1
-let g:cpp_class_decl_highlight = 1
-let g:cpp_experimental_template_highlight = 1
-let g:cpp_concepts_highlight = 1
-let g:vebugger_leader="\\"
-
-let g:DoxygenToolkit_commentType = "C++"
-
-au BufRead,BufNewFile *
-            \ let b:marker_open='<+' |
-            \ let b:marker_close='+>'
 
 " -----------------------------------------------------------------------------------------------}}}
-" -{{{---- Rust ------------------------------------------------------------------------------------
+" -{{{---- LSP -------------------------------------------------------------------------------------
 " --------------------------------------------------------------------------------------------------
 "
 "
-" Set completeopt to have a better completion experience
-" :help completeopt
-" menuone: popup even when there's only one match
-" noinsert: Do not insert text until a selection is made
-" noselect: Do not select, force user to select one from the menu
 set completeopt=menuone,noinsert,noselect
 
 " Avoid showing extra messages when using completion
 set shortmess+=c
 
-" Configure LSP
-" https://github.com/neovim/nvim-lspconfig#rust_analyzer
-"
 
-
-"lua <<EOF
-"
-"-- nvim_lsp object
-"local nvim_lsp = require'lspconfig'
-"
-"-- function to attach completion when setting up lsp
-"local on_attach = function(client)
-"    require'completion'.on_attach(client)
-"end
-"
-"-- Enable rust_analyzer
-"nvim_lsp.rust_analyzer.setup({ on_attach=on_attach })
-"nvim_lsp.clangd.setup({on_attach=on_attach})
-"
-"-- Enable diagnostics
-"vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-"  vim.lsp.diagnostic.on_publish_diagnostics, {
-"    virtual_text = true,
-"    signs = true,
-"    update_in_insert = true,
-"  }
-")
-"EOF
 lua << END
-local cmp = require'cmp'
-
-local lspconfig = require'lspconfig'
-cmp.setup({
-  snippet = {
-    -- REQUIRED by nvim-cmp. get rid of it once we can
-    expand = function(args)
-      vim.fn["vsnip#anonymous"](args.body)
-    end,
-  },
-  mapping = {
-    -- Tab immediately completes. C-n/C-p to select.
-    ['<Tab>'] = cmp.mapping.confirm({ select = true })
-  },
-  sources = cmp.config.sources({
-    -- TODO: currently snippets from lsp end up getting prioritized -- stop that!
-    { name = 'nvim_lsp' },
-  }, {
-    { name = 'path' },
-  }),
-  experimental = {
-    ghost_text = true,
-  },
-})
-
--- Enable completing paths in :
-cmp.setup.cmdline(':', {
-  sources = cmp.config.sources({
-    { name = 'path' }
-  })
-})
 
 -- Setup lspconfig.
 local on_attach = function(client, bufnr)
@@ -358,6 +263,10 @@ local on_attach = function(client, bufnr)
 end
 
 local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+
+local lspconfig = require'lspconfig'
+
+-- ---- Rust ---------------------------------------------------------------------------------------
 lspconfig.rust_analyzer.setup {
   on_attach = on_attach,
   flags = {
@@ -378,6 +287,19 @@ lspconfig.rust_analyzer.setup {
   capabilities = capabilities,
 }
 
+-- ---- C++ ----------------------------------------------------------------------------------------
+
+lspconfig.clangd.setup{
+    on_attach=on_attach,
+    capabilities=capabilities,
+}
+
+-- ---- Python -------------------------------------------------------------------------------------
+lspconfig.jedi_language_server.setup{
+    on_attach=on_attach,
+    capabilities=capabilities,
+}
+
 vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
   vim.lsp.diagnostic.on_publish_diagnostics, {
     virtual_text = true,
@@ -387,8 +309,62 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
 )
 END
 
+" ---- Snip Run ------------------------------------------------------------------------------------
+
+lua << END
+
+require'sniprun'.setup({selected_interpreters={Python3}})
+local cmp = require'cmp'
+
+-- Enable completing paths in :
+cmp.setup.cmdline(':', {
+  sources = cmp.config.sources({
+    { name = 'path' }
+  })
+})
+
+-- local luasnip = require("luasnip")
+
+
+cmp.setup({
+  snippet = {
+    -- REQUIRED by nvim-cmp. get rid of it once we can
+    expand = function(args)
+      vim.fn["vsnip#anonymous"](args.body)
+    end,
+  },
+   mapping = {
+     -- Tab immediately completes. C-n/C-p to select.
+     ["<Tab>"] = cmp.mapping(function(fallback)
+         if cmp.visible() then
+             cmp.select_next_item()
+         else
+             fallback()
+         end
+     end, {"i", "s"}),
+
+     ["<S-Tab>"] = cmp.mapping(function(fallback)
+         if cmp.visible() then
+             cmp.select_prev_item()
+         else
+             fallback()
+         end
+     end, {"i", "s"})
+   },
+  sources = cmp.config.sources({
+    -- TODO: currently snippets from lsp end up getting prioritized -- stop that!
+    { name = 'nvim_lsp' },
+  }, {
+    { name = 'path' },
+  }),
+  experimental = {
+    ghost_text = true,
+  },
+})
+
+END
 " Enable type inlay hints
-autocmd CursorHold,CursorHoldI *.rs :lua require'lsp_extensions'.inlay_hints{ only_current_line = true }
+"autocmd CursorHold,CursorHoldI *.rs :lua require'lsp_extensions'.inlay_hints{ only_current_line = true }
 
 " Plugin settings
 let g:secure_modelines_allowed_items = [
@@ -448,9 +424,9 @@ nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
 inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
-" use <Tab> as trigger keys
-imap <Tab> <Plug>(completion_smart_tab)
-imap <S-Tab> <Plug>(completion_smart_s_tab)
+"" use <Tab> as trigger keys
+" imap <Tab> <Plug>(completion_smart_tab)
+" imap <S-Tab> <Plug>(completion_smart_s_tab)
 
 " Set updatetime for CursorHold
 " 300ms of no cursor movement to trigger CursorHold
