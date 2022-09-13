@@ -28,14 +28,12 @@ set guioptions-=m
 set guioptions-=T
 set guioptions-=r
 set guioptions-=L
-" ->
+
 set guifont=Fira\ Code:h12
 if has('linux')
     set guifont=Fira\ Code:h2
 endif
 if has('win32')
-    "set guifont=Consolas:h18
-    " set guifont=JetBrains\ Mono:h16
     set guifont=Fira\ Code:h10
 endif
 
@@ -52,7 +50,7 @@ set omnifunc=syntaxcomplete#Complete
 " -{{{---- windows ---------------------------------------------------------------------------------
 " --------------------------------------------------------------------------------------------------
 if has('win32')
-    "set shell=powershell.exe
+    set shell=powershell.exe
 endif
 
 " -----------------------------------------------------------------------------------------------}}}
@@ -99,6 +97,8 @@ Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'jceb/vim-orgmode'
 Plugin 'vim-pandoc/vim-pandoc'
 Plugin 'vim-pandoc/vim-pandoc-syntax'
+Plugin 'oberblastmeister/neuron.nvim'
+Plugin 'nvim-telescope/telescope.nvim'
 
 " -------- Programming support ---------------------------------------------------------------------
 "Plugin 'scrooloose/syntastic'
@@ -107,6 +107,8 @@ Plugin 'tmhedberg/SimpylFold'
 Plugin 'tpope/vim-fugitive'
 Plugin 'neovim/nvim-lspconfig'
 Plugin 'nvim-lua/lsp_extensions.nvim'
+Plugin 'nvim-lua/popup.nvim'
+Plugin 'nvim-lua/plenary.nvim'
 "Plugin 'nvim-lua/completion-nvim'
 Plugin 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
 Plugin 'hrsh7th/cmp-buffer', {'branch': 'main'}
@@ -122,15 +124,13 @@ Plugin 'hrsh7th/vim-vsnip'
 "  general
 Plugin 'sheerun/vim-polyglot'
 Plugin 'stephpy/vim-yaml'
-" Plugin 'rust-lang/rust.vim'
-Plugin 'simrat39/rust-tools.nvim'
 "Plugin 'fatih/vim-go'
 Plugin 'dag/vim-fish'
 Plugin 'godlygeek/tabular'
 Plugin 'plasticboy/vim-markdown'
 " rust
 Plugin 'cespare/vim-toml'
-Plugin 'rust-lang/rust.vim'
+Plugin 'simrat39/rust-tools.nvim'
 Plugin 'mhinz/vim-crates'
 " python
 Plugin 'nvie/vim-flake8'
@@ -529,5 +529,19 @@ endfunction
 map <Leader>lx :<C-U>call SetXeTex()<CR>
 map <Leader>lw :<C-U>call SetWebTex()<CR>
 
+" -----------------------------------------------------------------------------------------------}}}
+" -{{{---- Organisation ----------------------------------------------------------------------------
+" --------------------------------------------------------------------------------------------------
+lua << EOF
+-- these are all the default values
+require'neuron'.setup {
+    virtual_titles = true,
+    mappings = true,
+    run = nil, -- function to run when in neuron dir
+    neuron_dir = "~/neuron", -- the directory of all of your notes, expanded by default (currently supports only one directory for notes, find a way to detect neuron.dhall to use any directory)
+    leader = "gz", -- the leader key to for all mappings, remember with 'go zettel'
+}
+
+EOF
 
 " -----------------------------------------------------------------------------------------------}}}
