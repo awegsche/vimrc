@@ -70,7 +70,7 @@ set secure
 
 " -------- Setup Vundle ----------------------------------------------------------------------------
 " set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
+set rtp+=~/.config/nvim/bundle/Vundle.vim
 call vundle#begin()
 
 " let Vundle manage Vundle, required
@@ -122,6 +122,9 @@ Plugin 'hrsh7th/vim-vsnip'
 "  general
 Plugin 'sheerun/vim-polyglot'
 Plugin 'stephpy/vim-yaml'
+" Plugin 'rust-lang/rust.vim'
+Plugin 'simrat39/rust-tools.nvim'
+"Plugin 'fatih/vim-go'
 Plugin 'dag/vim-fish'
 Plugin 'godlygeek/tabular'
 Plugin 'plasticboy/vim-markdown'
@@ -223,7 +226,6 @@ set completeopt=menuone,noinsert,noselect
 " Avoid showing extra messages when using completion
 set shortmess+=c
 
-
 lua << END
 
 -- Setup lspconfig.
@@ -235,7 +237,17 @@ local on_attach = function(client, bufnr)
   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   -- Mappings.
-  local opts = { noremap=true, silent=true }
+  local opts = {
+        noremap=true,
+        silent=true,
+        autoSetHints = true,
+        hover_with_actions = true,
+        inlay_hints = {
+            show_parameter_hints = false,
+            parameter_hints_prefix = "",
+            other_hints_prefix = "",
+        },
+    }
 
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
@@ -287,6 +299,31 @@ lspconfig.rust_analyzer.setup {
   capabilities = capabilities,
 }
 
+local opts = {
+    tools = { -- rust-tools options
+    },
+
+    -- all the opts to send to nvim-lspconfig
+    -- these override the defaults set by rust-tools.nvim
+    -- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#rust_analyzer
+    server = {
+        -- on_attach is a callback called when the language server attachs to the buffer
+        -- on_attach = on_attach,
+        settings = {
+            -- to enable rust-analyzer settings visit:
+            -- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
+            ["rust-analyzer"] = {
+                -- enable clippy on save
+                checkOnSave = {
+                    command = "clippy"
+                },
+            }
+        }
+    },
+}
+
+require('rust-tools').setup(opts)
+
 -- ---- C++ ----------------------------------------------------------------------------------------
 
 lspconfig.clangd.setup{
@@ -314,27 +351,19 @@ END
 lua << END
 
 require'sniprun'.setup({selected_interpreters={Python3}})
+
 local cmp = require'cmp'
-
--- Enable completing paths in :
-cmp.setup.cmdline(':', {
-  sources = cmp.config.sources({
-    { name = 'path' }
-  })
-})
-
--- local luasnip = require("luasnip")
-
-
 cmp.setup({
+  -- Enable LSP snippets
   snippet = {
-    -- REQUIRED by nvim-cmp. get rid of it once we can
     expand = function(args)
-      vim.fn["vsnip#anonymous"](args.body)
+        vim.fn["vsnip#anonymous"](args.body)
     end,
   },
-   mapping = {
-     -- Tab immediately completes. C-n/C-p to select.
+  mapping = {
+    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-n>'] = cmp.mapping.select_next_item(),
+    -- Add tab support
      ["<Tab>"] = cmp.mapping(function(fallback)
          if cmp.visible() then
              cmp.select_next_item()
@@ -349,16 +378,23 @@ cmp.setup({
          else
              fallback()
          end
-     end, {"i", "s"})
-   },
-  sources = cmp.config.sources({
-    -- TODO: currently snippets from lsp end up getting prioritized -- stop that!
+     end, {"i", "s"}),
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.close(),
+    ['<CR>'] = cmp.mapping.confirm({
+      behavior = cmp.ConfirmBehavior.Insert,
+      select = true,
+    })
+  },
+
+  -- Installed sources
+  sources = {
     { name = 'nvim_lsp' },
-  }, {
+    { name = 'vsnip' },
     { name = 'path' },
-  }),
-  experimental = {
-    ghost_text = true,
+    { name = 'buffer' },
   },
 })
 
@@ -424,9 +460,6 @@ nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
 inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
-"" use <Tab> as trigger keys
-" imap <Tab> <Plug>(completion_smart_tab)
-" imap <S-Tab> <Plug>(completion_smart_s_tab)
 
 " Set updatetime for CursorHold
 " 300ms of no cursor movement to trigger CursorHold
