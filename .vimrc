@@ -83,6 +83,8 @@ Plugin 'gmarik/Vundle.vim'
 " -------- Vim itself ------------------------------------------------------------------------------
 Plugin 'ciaranm/securemodelines'
 Plugin 'itchyny/lightline.vim'
+Plugin 'itchyny/vim-gitbranch'
+Plugin 'spywhere/lightline-lsp'
 Plugin 'machakann/vim-highlightedyank'
 Plugin 'michaelb/sniprun', {'do': 'bash install.sh'}
 
@@ -115,6 +117,7 @@ Plugin 'neovim/nvim-lspconfig'
 Plugin 'nvim-lua/lsp_extensions.nvim'
 Plugin 'nvim-lua/popup.nvim'
 Plugin 'nvim-lua/plenary.nvim'
+" Plugin 'nvim-lua/lsp-status.nvim'
 "Plugin 'nvim-lua/completion-nvim'
 Plugin 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
 Plugin 'hrsh7th/cmp-buffer', {'branch': 'main'}
@@ -194,6 +197,7 @@ let g:miramare_disable_italic_comment=1
 "colorscheme miramare
 let g:gruvbox_material_background = 'soft'
 colorscheme gruvbox-material
+set noshowmode
 
 set colorcolumn=101
 highlight ColorColumn ctermbg=236
@@ -404,6 +408,7 @@ cmp.setup({
   },
 })
 
+
 END
 " Enable type inlay hints
 "autocmd CursorHold,CursorHoldI *.rs :lua require'lsp_extensions'.inlay_hints{ only_current_line = true }
@@ -555,6 +560,45 @@ function SetWebTex()
 endfunction
 map <Leader>lx :<C-U>call SetXeTex()<CR>
 map <Leader>lw :<C-U>call SetWebTex()<CR>
+
+" " -----------------------------------------------------------------------------------------------}}}
+" " -{{{---- Status Line -----------------------------------------------------------------------------
+" " --------------------------------------------------------------------------------------------------
+"
+let g:lightline = {}
+
+let g:lightline.component_expand = {
+      \  'linter_hints': 'lightline#lsp#hints',
+      \  'linter_infos': 'lightline#lsp#infos',
+      \  'linter_warnings': 'lightline#lsp#warnings',
+      \  'linter_errors': 'lightline#lsp#errors',
+      \  'linter_ok': 'lightline#lsp#ok',
+      \ }
+
+let g:lightline.component = {
+      \  'helloworld': 'Hello world',
+      \ }
+
+let g:lightline.component_function = {
+      \   'gitbranch': 'FugitiveHead'
+      \ }
+"
+let g:lightline.component_type = {
+      \     'linter_hints': 'right',
+      \     'linter_infos': 'right',
+      \     'linter_warnings': 'warning',
+      \     'linter_errors': 'error',
+      \     'linter_ok': 'right',
+      \     'gitbranch': 'right',
+      \     'helloworld': 'right',
+      \ }
+"
+let g:lightline.active = {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'gitbranch', 'readonly', 'filename', 'modified' ],
+      \             [ 'linter_hints', 'linter_errors', 'linter_warnings', 'linter_ok'] ,
+      \           ]
+      \ }
 
 " " -----------------------------------------------------------------------------------------------}}}
 " " -{{{---- Organisation ----------------------------------------------------------------------------
