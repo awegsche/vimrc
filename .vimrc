@@ -7,7 +7,8 @@ set hidden
 filetype plugin on
 
 syntax on
-set nu
+set number relativenumber
+set nu rnu
 
 set nocompatible              " required
 filetype off                  " required
