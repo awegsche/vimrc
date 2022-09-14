@@ -49,9 +49,9 @@ set omnifunc=syntaxcomplete#Complete
 " -----------------------------------------------------------------------------------------------}}}
 " -{{{---- windows ---------------------------------------------------------------------------------
 " --------------------------------------------------------------------------------------------------
-if has('win32')
-    set shell=powershell.exe
-endif
+" if has('win32')
+"     set shell=powershell.exe
+" endif
 
 " -----------------------------------------------------------------------------------------------}}}
 " -{{{---- C++ projects ----------------------------------------------------------------------------
@@ -68,8 +68,13 @@ set secure
 
 " -------- Setup Vundle ----------------------------------------------------------------------------
 " set the runtime path to include Vundle and initialize
-set rtp+=~/.config/nvim/bundle/Vundle.vim
-call vundle#begin()
+if has('win32')
+  set rtp+=$HOME/.config/bundle/Vundle.vim/
+  call vundle#begin('$HOME/.config/bundle/')
+else 
+  set rtp+=~/.config/nvim/bundle/Vundle.vim
+  call vundle#begin()
+endif
 
 " let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
