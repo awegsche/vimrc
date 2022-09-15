@@ -103,8 +103,8 @@ Plugin 'jnurmine/Zenburn'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'jceb/vim-orgmode'
-Plugin 'vim-pandoc/vim-pandoc'
-Plugin 'vim-pandoc/vim-pandoc-syntax'
+ Plugin 'vim-pandoc/vim-pandoc'
+ Plugin 'vim-pandoc/vim-pandoc-syntax'
 " Plugin 'oberblastmeister/neuron.nvim'
 Plugin 'nvim-telescope/telescope.nvim'
 
@@ -131,12 +131,16 @@ Plugin 'hrsh7th/vim-vsnip'
 
 " -------- Syntax --------------------------------
 "  general
+let g:polyglot_disabled=['md', 'markdown']
 Plugin 'sheerun/vim-polyglot'
 Plugin 'stephpy/vim-yaml'
 "Plugin 'fatih/vim-go'
 Plugin 'dag/vim-fish'
 Plugin 'godlygeek/tabular'
-Plugin 'plasticboy/vim-markdown'
+" markdown
+" let g:vim_markdown_fenced_languages = ['python','py=python', 'cpp', 'java']
+" let g:markdown_fenced_languages = ['python','py=python', 'cpp', 'java']
+" Plugin 'preservim/vim-markdown'
 " rust
 Plugin 'cespare/vim-toml'
 Plugin 'simrat39/rust-tools.nvim'
@@ -560,6 +564,12 @@ function SetWebTex()
 endfunction
 map <Leader>lx :<C-U>call SetXeTex()<CR>
 map <Leader>lw :<C-U>call SetWebTex()<CR>
+
+" -----------------------------------------------------------------------------------------------}}}
+" -{{{---- Markdown --------------------------------------------------------------------------------
+" --------------------------------------------------------------------------------------------------
+
+let g:pandoc#syntax#codeblocks#embeds#langs = ["python", "sh", "bash", "c", "cpp", "vim", "latex", "rust", "html", "java"]
 
 " " -----------------------------------------------------------------------------------------------}}}
 " " -{{{---- Status Line -----------------------------------------------------------------------------
