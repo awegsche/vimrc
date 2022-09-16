@@ -155,7 +155,8 @@ Plugin 'kshenoy/vim-signature'
 
 " -------- Latex -----------------------------------------------------------------------------------
 Plugin 'lervag/vimtex'
-Plugin 'vim-latex/vim-latex' 
+Plugin 'Konfekt/FastFold'
+Plugin 'matze/vim-tex-fold'
 
 " -------- OrgMode ---------------------------------------------------------------------------------
 Plugin 'nvim-treesitter/nvim-treesitter'
@@ -350,6 +351,13 @@ lspconfig.clangd.setup{
     capabilities=capabilities,
 }
 
+-- ---- Latex LSP ----------------------------------------------------------------------------------
+
+lspconfig.texlab.setup{
+    on_attach=on_attach,
+    capabilities=capabilities,
+}
+
 -- ---- Python -------------------------------------------------------------------------------------
 lspconfig.jedi_language_server.setup{
     on_attach=on_attach,
@@ -414,6 +422,8 @@ cmp.setup({
     { name = 'vsnip' },
     { name = 'path' },
     { name = 'buffer' },
+    { name = 'latex' },
+    { name = 'orgmode' },
   },
 })
 
@@ -794,6 +804,7 @@ require'nvim-treesitter.configs'.setup {
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = {'org'}, -- Required for spellcheck, some LaTex highlights and code block highlights that do not have ts grammar
+    disable = { "c", "c++", "rust", "md", "markdown", "vim" },
   },
   ensure_installed = {'org'}, -- Or run :TSUpdate org
 }
