@@ -153,9 +153,14 @@ Plugin 'rhysd/vim-clang-format'
 
 Plugin 'kshenoy/vim-signature'
 
-" -------- Latex ---------------------------------
+" -------- Latex -----------------------------------------------------------------------------------
 Plugin 'lervag/vimtex'
 Plugin 'vim-latex/vim-latex' 
+
+" -------- OrgMode ---------------------------------------------------------------------------------
+Plugin 'nvim-treesitter/nvim-treesitter'
+Plugin 'nvim-orgmode/orgmode'
+
 
 " -------- Colorschemes ----------------------------------------------------------------------------
 "Plugin 'rafi/awesome-vim-colorschemes'
@@ -778,16 +783,25 @@ nnoremap <silent> <leader>cC :lua require('crates').open_crates_io()<cr>
 " " -----------------------------------------------------------------------------------------------}}}
 " " -{{{---- Organisation ----------------------------------------------------------------------------
 " " --------------------------------------------------------------------------------------------------
-" lua << EOF
-" -- these are all the default values
-" require'neuron'.setup {
-"     virtual_titles = true,
-"     mappings = true,
-"     run = nil, -- function to run when in neuron dir
-"     neuron_dir = "~/neuron", -- the directory of all of your notes, expanded by default (currently supports only one directory for notes, find a way to detect neuron.dhall to use any directory)
-"     leader = "gz", -- the leader key to for all mappings, remember with 'go zettel'
-" }
-" 
-" EOF
+lua << EOF
+
+-- Load custom tree-sitter grammar for org filetype
+require('orgmode').setup_ts_grammar()
+
+-- Tree-sitter configuration
+require'nvim-treesitter.configs'.setup {
+  -- If TS highlights are not enabled at all, or disabled via `disable` prop, highlighting will fallback to default Vim syntax highlighting
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = {'org'}, -- Required for spellcheck, some LaTex highlights and code block highlights that do not have ts grammar
+  },
+  ensure_installed = {'org'}, -- Or run :TSUpdate org
+}
+
+require('orgmode').setup({
+  org_agenda_files = {'~/org/*', '~/my-orgs/**/*'},
+  org_default_notes_file = '~/org/notes.org',
+})
+EOF
 
 " -----------------------------------------------------------------------------------------------}}}
