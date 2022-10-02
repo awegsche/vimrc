@@ -150,6 +150,9 @@ Plugin 'nvie/vim-flake8'
 Plugin 'vim-scripts/indentpython.vim'
 " c/c++
 Plugin 'rhysd/vim-clang-format'
+" java
+"Plugin 'neoclide/coc.nvim'
+Plugin 'williamboman/nvim-lsp-installer'
 
 Plugin 'kshenoy/vim-signature'
 
@@ -188,6 +191,7 @@ Plugin 'flrnprz/plastic.vim'
 Plugin 'franbach/miramare'
 Plugin 'dfrunza/vim'
 Plugin 'sainnhe/gruvbox-material'
+Plugin 'arcticicestudio/nord-vim'
 
 
 " -------- End Vundlde -----------------------------------------------------------------------------
@@ -217,6 +221,7 @@ let g:miramare_disable_italic_comment=1
 "colorscheme miramare
 let g:gruvbox_material_background = 'soft'
 colorscheme gruvbox-material
+"colorscheme nord
 set noshowmode
 
 set colorcolumn=101
@@ -250,13 +255,17 @@ nnoremap <C-F8> :botright split <CR> :resize 20 <CR> :terminal ++curwin <CR>
 " -{{{---- LSP -------------------------------------------------------------------------------------
 " --------------------------------------------------------------------------------------------------
 "
+
 "
+
 set completeopt=menuone,noinsert,noselect
 
 " Avoid showing extra messages when using completion
 set shortmess+=c
 
 lua << END
+
+require("nvim-lsp-installer").setup()
 
 -- Setup lspconfig.
 local on_attach = function(client, bufnr)
@@ -369,7 +378,7 @@ lspconfig.texlab.setup{
 }
 
 -- ---- Python -------------------------------------------------------------------------------------
-lspconfig.jedi_language_server.setup{
+lspconfig.pyls.setup{
     on_attach=on_attach,
     capabilities=capabilities,
 }
