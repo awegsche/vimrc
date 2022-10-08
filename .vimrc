@@ -113,12 +113,20 @@ Plugin 'nvim-telescope/telescope.nvim'
 "Plugin 'w0rp/ale'
 Plugin 'tmhedberg/SimpylFold'
 Plugin 'tpope/vim-fugitive'
-Plugin 'neovim/nvim-lspconfig'
-Plugin 'nvim-lua/lsp_extensions.nvim'
-Plugin 'nvim-lua/popup.nvim'
-Plugin 'nvim-lua/plenary.nvim'
-" Plugin 'nvim-lua/lsp-status.nvim'
+" ---- I give up on native lsp for a moment for the following reasons:
+"  - keeping rust-analyzer up to date manually is annoying
+"  - setting up for ANY programming language is complicated, no out-of-the-box solution
+"  - couldn't get eclipse ls to run at all
+"Plugin 'neovim/nvim-lspconfig'
+"Plugin 'nvim-lua/lsp_extensions.nvim'
+"Plugin 'nvim-lua/popup.nvim'
+"Plugin 'nvim-lua/plenary.nvim'
+"Plugin 'nvim-lua/lsp-status.nvim'
 "Plugin 'nvim-lua/completion-nvim'
+" ---- instead, use CoC ----------------------------------------------------------------------------
+Plugin 'neoclide/coc.nvim'
+Plugin 'williamboman/nvim-lsp-installer'
+" --------------------------------------------------------------------------------------------------
 Plugin 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
 Plugin 'hrsh7th/cmp-buffer', {'branch': 'main'}
 Plugin 'hrsh7th/cmp-path', {'branch': 'main'}
@@ -144,15 +152,14 @@ Plugin 'godlygeek/tabular'
 " rust
 Plugin 'cespare/vim-toml'
 Plugin 'simrat39/rust-tools.nvim'
-Plugin 'saecki/crates.nvim'
+" Plugin 'saecki/crates.nvim'
 " python
 Plugin 'nvie/vim-flake8'
 Plugin 'vim-scripts/indentpython.vim'
 " c/c++
-Plugin 'rhysd/vim-clang-format'
+"Plugin 'rhysd/vim-clang-format'
+Plugin 'p00f/clangd_extensions.nvim'
 " java
-"Plugin 'neoclide/coc.nvim'
-Plugin 'williamboman/nvim-lsp-installer'
 
 Plugin 'kshenoy/vim-signature'
 
@@ -192,6 +199,7 @@ Plugin 'franbach/miramare'
 Plugin 'dfrunza/vim'
 Plugin 'sainnhe/gruvbox-material'
 Plugin 'arcticicestudio/nord-vim'
+Plugin 'folke/tokyonight.nvim', { 'branch': 'main' }
 
 
 " -------- End Vundlde -----------------------------------------------------------------------------
@@ -220,8 +228,9 @@ let g:miramare_enable_italic=1
 let g:miramare_disable_italic_comment=1
 "colorscheme miramare
 let g:gruvbox_material_background = 'soft'
-colorscheme gruvbox-material
+"colorscheme gruvbox-material
 "colorscheme nord
+colorscheme tokyonight-storm
 set noshowmode
 
 set colorcolumn=101
@@ -250,206 +259,6 @@ let termwinsize = 20
 
 nnoremap <C-F8> :botright split <CR> :resize 20 <CR> :terminal ++curwin <CR>
 
-
-" -----------------------------------------------------------------------------------------------}}}
-" -{{{---- LSP -------------------------------------------------------------------------------------
-" --------------------------------------------------------------------------------------------------
-"
-
-"
-
-set completeopt=menuone,noinsert,noselect
-
-" Avoid showing extra messages when using completion
-set shortmess+=c
-
-lua << END
-
-require("nvim-lsp-installer").setup()
-
--- Setup lspconfig.
-local on_attach = function(client, bufnr)
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-
-  --Enable completion triggered by <c-x><c-o>
-  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-  -- Mappings.
-  local opts = {
-        noremap=true,
-        silent=true,
-        autoSetHints = true,
-        hover_with_actions = true,
-        inlay_hints = {
-            show_parameter_hints = false,
-            parameter_hints_prefix = "",
-            other_hints_prefix = "",
-        },
-    }
-
-  -- -- See `:help vim.lsp.*` for documentation on any of the below functions
-  -- buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  -- buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  -- buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  -- buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  -- buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  -- buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  -- buf_set_keymap('n', '<space>r', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  -- buf_set_keymap('n', '<space>a', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  -- buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  -- buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
-  -- buf_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
-  -- buf_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
-  -- buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.set_loclist()<CR>', opts)
-  -- buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-
-  -- Get signatures (and _only_ signatures) when in argument lists.
-  require "lsp_signature".on_attach({
-    doc_lines = 0,
-    handler_opts = {
-      border = "none"
-    },
-  })
-end
-
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
-
-local lspconfig = require'lspconfig'
-
--- ---- Rust ---------------------------------------------------------------------------------------
-lspconfig.rust_analyzer.setup {
-  on_attach = on_attach,
-  flags = {
-    debounce_text_changes = 150,
-  },
-  settings = {
-    ["rust-analyzer"] = {
-      cargo = {
-        allFeatures = true,
-      },
-      completion = {
-	postfix = {
-	  enable = false,
-	},
-      },
-    },
-  },
-  capabilities = capabilities,
-}
-
-local opts = {
-    tools = { -- rust-tools options
-    },
-
-    -- all the opts to send to nvim-lspconfig
-    -- these override the defaults set by rust-tools.nvim
-    -- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#rust_analyzer
-    server = {
-        -- on_attach is a callback called when the language server attachs to the buffer
-        -- on_attach = on_attach,
-        settings = {
-            -- to enable rust-analyzer settings visit:
-            -- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
-            ["rust-analyzer"] = {
-                -- enable clippy on save
-                checkOnSave = {
-                    command = "clippy"
-                },
-            }
-        }
-    },
-}
-
-require('rust-tools').setup(opts)
-
--- ---- C++ ----------------------------------------------------------------------------------------
-
-lspconfig.clangd.setup{
-    on_attach=on_attach,
-    capabilities=capabilities,
-}
-
--- ---- Latex LSP ----------------------------------------------------------------------------------
-
-lspconfig.texlab.setup{
-    on_attach=on_attach,
-    capabilities=capabilities,
-}
-
--- ---- Python -------------------------------------------------------------------------------------
-lspconfig.pyls.setup{
-    on_attach=on_attach,
-    capabilities=capabilities,
-}
-
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics, {
-    virtual_text = true,
-    signs = true,
-    update_in_insert = true,
-  }
-)
-END
-
-" ---- Snip Run ------------------------------------------------------------------------------------
-
-lua << END
-
-require'sniprun'.setup({selected_interpreters={Python3}})
-
-local cmp = require'cmp'
-cmp.setup({
-  -- Enable LSP snippets
-  snippet = {
-    expand = function(args)
-        vim.fn["vsnip#anonymous"](args.body)
-    end,
-  },
-  mapping = {
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    -- Add tab support
-     ["<Tab>"] = cmp.mapping(function(fallback)
-         if cmp.visible() then
-             cmp.select_next_item()
-         else
-             fallback()
-         end
-     end, {"i", "s"}),
-
-     ["<S-Tab>"] = cmp.mapping(function(fallback)
-         if cmp.visible() then
-             cmp.select_prev_item()
-         else
-             fallback()
-         end
-     end, {"i", "s"}),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.close(),
-    ['<CR>'] = cmp.mapping.confirm({
-      behavior = cmp.ConfirmBehavior.Insert,
-      select = true,
-    })
-  },
-
-  -- Installed sources
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'vsnip' },
-    { name = 'path' },
-    { name = 'buffer' },
-    { name = 'latex' },
-    { name = 'orgmode' },
-  },
-})
-
-
-END
-" Enable type inlay hints
-"autocmd CursorHold,CursorHoldI *.rs :lua require'lsp_extensions'.inlay_hints{ only_current_line = true }
 
 " Plugin settings
 let g:secure_modelines_allowed_items = [
@@ -509,27 +318,69 @@ set updatetime=300
   " buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 
 " Code navigation shortcuts
-nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap <silent> K     <cmd>lua vim.lsp.buf.hover()<CR>
-nnoremap <silent> gD    <cmd>lua vim.lsp.buf.implementation()<CR>
-nnoremap <silent> gd    <cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap <silent> <c-k> <cmd>lua vim.lsp.buf.signature_help()<CR>
-nnoremap <silent> 1gD   <cmd>lua vim.lsp.buf.type_definition()<CR>
-nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
-nnoremap <silent> gR    <cmd>lua vim.lsp.buf.rename()<CR>
-nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
-nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
-nnoremap <silent> 1gd    <cmd>lua vim.lsp.buf.declaration()<CR>
-nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
-nnoremap <silent> [d    <cmd>lua vim.diagnostic.goto_next()<CR>
-nnoremap <silent> ]d    <cmd>lua vim.diagnostic.goto_prev()<CR>
-nnoremap <silent> [e    <cmd>lua vim.diagnostic.open_float()<CR>
-nnoremap <silent> F    <cmd>lua vim.lsp.buf.formatting()<CR>
+" nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
+" nnoremap <silent> K     <cmd>lua vim.lsp.buf.hover()<CR>
+" nnoremap <silent> gD    <cmd>lua vim.lsp.buf.implementation()<CR>
+" nnoremap <silent> gd    <cmd>lua vim.lsp.buf.definition()<CR>
+" nnoremap <silent> <c-k> <cmd>lua vim.lsp.buf.signature_help()<CR>
+" nnoremap <silent> 1gD   <cmd>lua vim.lsp.buf.type_definition()<CR>
+" nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
+" nnoremap <silent> gR    <cmd>lua vim.lsp.buf.rename()<CR>
+" nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
+" nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
+" nnoremap <silent> 1gd    <cmd>lua vim.lsp.buf.declaration()<CR>
+" nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
+" nnoremap <silent> [d    <cmd>lua vim.diagnostic.goto_next()<CR>
+" nnoremap <silent> ]d    <cmd>lua vim.diagnostic.goto_prev()<CR>
+" nnoremap <silent> [e    <cmd>lua vim.diagnostic.open_float()<CR>
+" nnoremap <silent> F    <cmd>lua vim.lsp.buf.formatting()<CR>
+" --------------------------------------------------------------------------------------------------
+" ---- Coc -----------------------------------------------------------------------------------------
+" --------------------------------------------------------------------------------------------------
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: There's always complete item selected by default, you may want to enable
+" no select by `"suggest.noselect": true` in your configuration file.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice.
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+nnoremap <silent> K     :call ShowDocumentation()<CR>
+nnoremap <silent> gD    <Plug>(coc-implementation)
+nnoremap <silent> gd    <Plug>(coc-definition)
+nnoremap <silent> 1gD   <Plug>(coc-type-definition)
+nnoremap <silent> gr    <Plug>(coc-references)
+nnoremap <silent> gR    <Plug>(coc-rename)
+nnoremap <silent> ga    <Plug>(coc-codeaction-selected)
+nnoremap <silent> gA    <Plug>(coc-fix-current)
+nnoremap <silent> gl    <Plug>(coc-codelens-action)
+nnoremap <silent> [d    <Plug>(coc-diagnostic-prev)
+nnoremap <silent> ]d    <Plug>(coc-diagnostic-next)
+nnoremap <silent> F    :call CocActionAsync('format')
 " Use <Tab> and <S-Tab> to navigate through popup menu
-inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+" inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
 
 " Set updatetime for CursorHold
 " 300ms of no cursor movement to trigger CursorHold
@@ -647,168 +498,168 @@ let g:lightline.active = {
 " " -----------------------------------------------------------------------------------------------}}}
 " " -{{{---- Crates ----------------------------------------------------------------------------------
 " " --------------------------------------------------------------------------------------------------
-lua << END
-require('crates').setup {
-    smart_insert = true,
-    insert_closing_quote = true,
-    avoid_prerelease = true,
-    autoload = true,
-    autoupdate = true,
-    loading_indicator = true,
-    date_format = "%Y-%m-%d",
-    thousands_separator = ".",
-    notification_title = "Crates",
-    disable_invalid_feature_diagnostic = false,
-    text = {
-        loading = "  Loading",
-        version = "  v %s",
-        prerelease = "  pre %s",
-        yanked = "  y %s",
-        nomatch = "  No match",
-        upgrade = "  u %s",
-        error = "  Error fetching crate",
-    },
-    highlight = {
-        loading = "CratesNvimLoading",
-        version = "CratesNvimVersion",
-        prerelease = "CratesNvimPreRelease",
-        yanked = "CratesNvimYanked",
-        nomatch = "CratesNvimNoMatch",
-        upgrade = "CratesNvimUpgrade",
-        error = "CratesNvimError",
-    },
-    popup = {
-        autofocus = false,
-        copy_register = '"',
-        style = "minimal",
-        border = "none",
-        show_version_date = false,
-        show_dependency_version = true,
-        max_height = 30,
-        min_width = 20,
-        padding = 1,
-        text = {
-            title = "# %s",
-            pill_left = "<",
-            pill_right = "<",
-            description = "%s",
-            created_label = "created        ",
-            created = "%s",
-            updated_label = "updated        ",
-            updated = "%s",
-            downloads_label = "downloads      ",
-            downloads = "%s",
-            homepage_label = "homepage       ",
-            homepage = "%s",
-            repository_label = "repository     ",
-            repository = "%s",
-            documentation_label = "documentation  ",
-            documentation = "%s",
-            crates_io_label = "crates.io      ",
-            crates_io = "%s",
-            categories_label = "categories     ",
-            keywords_label = "keywords       ",
-            version = "  %s",
-            prerelease = "%s",
-            yanked = "%s",
-            version_date = "  %s",
-            feature = "  %s",
-            enabled = "%s",
-            transitive = "%s",
-            normal_dependencies_title = "Dependencies",
-            build_dependencies_title = "Build dependencies",
-            dev_dependencies_title = "Dev dependencies",
-            dependency = "  %s",
-            optional = "%s",
-            dependency_version = "  %s",
-            loading = "...",
-        },
-        highlight = {
-            title = "CratesNvimPopupTitle",
-            pill_text = "CratesNvimPopupPillText",
-            pill_border = "CratesNvimPopupPillBorder",
-            description = "CratesNvimPopupDescription",
-            created_label = "CratesNvimPopupLabel",
-            created = "CratesNvimPopupValue",
-            updated_label = "CratesNvimPopupLabel",
-            updated = "CratesNvimPopupValue",
-            downloads_label = "CratesNvimPopupLabel",
-            downloads = "CratesNvimPopupValue",
-            homepage_label = "CratesNvimPopupLabel",
-            homepage = "CratesNvimPopupUrl",
-            repository_label = "CratesNvimPopupLabel",
-            repository = "CratesNvimPopupUrl",
-            documentation_label = "CratesNvimPopupLabel",
-            documentation = "CratesNvimPopupUrl",
-            crates_io_label = "CratesNvimPopupLabel",
-            crates_io = "CratesNvimPopupUrl",
-            categories_label = "CratesNvimPopupLabel",
-            keywords_label = "CratesNvimPopupLabel",
-            version = "CratesNvimPopupVersion",
-            prerelease = "CratesNvimPopupPreRelease",
-            yanked = "CratesNvimPopupYanked",
-            version_date = "CratesNvimPopupVersionDate",
-            feature = "CratesNvimPopupFeature",
-            enabled = "CratesNvimPopupEnabled",
-            transitive = "CratesNvimPopupTransitive",
-            normal_dependencies_title = "CratesNvimPopupNormalDependenciesTitle",
-            build_dependencies_title = "CratesNvimPopupBuildDependenciesTitle",
-            dev_dependencies_title = "CratesNvimPopupDevDependenciesTitle",
-            dependency = "CratesNvimPopupDependency",
-            optional = "CratesNvimPopupOptional",
-            dependency_version = "CratesNvimPopupDependencyVersion",
-            loading = "CratesNvimPopupLoading",
-        },
-        keys = {
-            hide = { "q", "<esc>" },
-            open_url = { "<cr>" },
-            select = { "<cr>" },
-            select_alt = { "s" },
-            toggle_feature = { "<cr>" },
-            copy_value = { "yy" },
-            goto_item = { "gd", "K", "<C-LeftMouse>" },
-            jump_forward = { "<c-i>" },
-            jump_back = { "<c-o>", "<C-RightMouse>" },
-        },
-    },
-    src = {
-        insert_closing_quote = true,
-        text = {
-            prerelease = "  pre-release ",
-            yanked = "  yanked ",
-        },
-        coq = {
-            enabled = false,
-            name = "Crates",
-        },
-    },
-    null_ls = {
-        enabled = false,
-        name = "Crates",
-    },
-}
-
-END
-
-nnoremap <silent> <leader>ct :lua require('crates').toggle()<cr>
-nnoremap <silent> <leader>cr :lua require('crates').reload()<cr>
-
-nnoremap <silent> <leader>cv :lua require('crates').show_versions_popup()<cr>
-nnoremap <silent> <leader>cf :lua require('crates').show_features_popup()<cr>
-nnoremap <silent> <leader>cd :lua require('crates').show_dependencies_popup()<cr>
-
-nnoremap <silent> <leader>cu :lua require('crates').update_crate()<cr>
-vnoremap <silent> <leader>cu :lua require('crates').update_crates()<cr>
-nnoremap <silent> <leader>ca :lua require('crates').update_all_crates()<cr>
-nnoremap <silent> <leader>cU :lua require('crates').upgrade_crate()<cr>
-vnoremap <silent> <leader>cU :lua require('crates').upgrade_crates()<cr>
-nnoremap <silent> <leader>cA :lua require('crates').upgrade_all_crates()<cr>
-
-nnoremap <silent> <leader>cH :lua require('crates').open_homepage()<cr>
-nnoremap <silent> <leader>cR :lua require('crates').open_repository()<cr>
-nnoremap <silent> <leader>cD :lua require('crates').open_documentation()<cr>
-nnoremap <silent> <leader>cC :lua require('crates').open_crates_io()<cr>
-
+""  lua << END
+""  require('crates').setup {
+""      smart_insert = true,
+""      insert_closing_quote = true,
+""      avoid_prerelease = true,
+""      autoload = true,
+""      autoupdate = true,
+""      loading_indicator = true,
+""      date_format = "%Y-%m-%d",
+""      thousands_separator = ".",
+""      notification_title = "Crates",
+""      disable_invalid_feature_diagnostic = false,
+""      text = {
+""          loading = "  Loading",
+""          version = "  v %s",
+""          prerelease = "  pre %s",
+""          yanked = "  y %s",
+""          nomatch = "  No match",
+""          upgrade = "  u %s",
+""          error = "  Error fetching crate",
+""      },
+""      highlight = {
+""          loading = "CratesNvimLoading",
+""          version = "CratesNvimVersion",
+""          prerelease = "CratesNvimPreRelease",
+""          yanked = "CratesNvimYanked",
+""          nomatch = "CratesNvimNoMatch",
+""          upgrade = "CratesNvimUpgrade",
+""          error = "CratesNvimError",
+""      },
+""      popup = {
+""          autofocus = false,
+""          copy_register = '"',
+""          style = "minimal",
+""          border = "none",
+""          show_version_date = false,
+""          show_dependency_version = true,
+""          max_height = 30,
+""          min_width = 20,
+""          padding = 1,
+""          text = {
+""              title = "# %s",
+""              pill_left = "<",
+""              pill_right = "<",
+""              description = "%s",
+""              created_label = "created        ",
+""              created = "%s",
+""              updated_label = "updated        ",
+""              updated = "%s",
+""              downloads_label = "downloads      ",
+""              downloads = "%s",
+""              homepage_label = "homepage       ",
+""              homepage = "%s",
+""              repository_label = "repository     ",
+""              repository = "%s",
+""              documentation_label = "documentation  ",
+""              documentation = "%s",
+""              crates_io_label = "crates.io      ",
+""              crates_io = "%s",
+""              categories_label = "categories     ",
+""              keywords_label = "keywords       ",
+""              version = "  %s",
+""              prerelease = "%s",
+""              yanked = "%s",
+""              version_date = "  %s",
+""              feature = "  %s",
+""              enabled = "%s",
+""              transitive = "%s",
+""              normal_dependencies_title = "Dependencies",
+""              build_dependencies_title = "Build dependencies",
+""              dev_dependencies_title = "Dev dependencies",
+""              dependency = "  %s",
+""              optional = "%s",
+""              dependency_version = "  %s",
+""              loading = "...",
+""          },
+""          highlight = {
+""              title = "CratesNvimPopupTitle",
+""              pill_text = "CratesNvimPopupPillText",
+""              pill_border = "CratesNvimPopupPillBorder",
+""              description = "CratesNvimPopupDescription",
+""              created_label = "CratesNvimPopupLabel",
+""              created = "CratesNvimPopupValue",
+""              updated_label = "CratesNvimPopupLabel",
+""              updated = "CratesNvimPopupValue",
+""              downloads_label = "CratesNvimPopupLabel",
+""              downloads = "CratesNvimPopupValue",
+""              homepage_label = "CratesNvimPopupLabel",
+""              homepage = "CratesNvimPopupUrl",
+""              repository_label = "CratesNvimPopupLabel",
+""              repository = "CratesNvimPopupUrl",
+""              documentation_label = "CratesNvimPopupLabel",
+""              documentation = "CratesNvimPopupUrl",
+""              crates_io_label = "CratesNvimPopupLabel",
+""              crates_io = "CratesNvimPopupUrl",
+""              categories_label = "CratesNvimPopupLabel",
+""              keywords_label = "CratesNvimPopupLabel",
+""              version = "CratesNvimPopupVersion",
+""              prerelease = "CratesNvimPopupPreRelease",
+""              yanked = "CratesNvimPopupYanked",
+""              version_date = "CratesNvimPopupVersionDate",
+""              feature = "CratesNvimPopupFeature",
+""              enabled = "CratesNvimPopupEnabled",
+""              transitive = "CratesNvimPopupTransitive",
+""              normal_dependencies_title = "CratesNvimPopupNormalDependenciesTitle",
+""              build_dependencies_title = "CratesNvimPopupBuildDependenciesTitle",
+""              dev_dependencies_title = "CratesNvimPopupDevDependenciesTitle",
+""              dependency = "CratesNvimPopupDependency",
+""              optional = "CratesNvimPopupOptional",
+""              dependency_version = "CratesNvimPopupDependencyVersion",
+""              loading = "CratesNvimPopupLoading",
+""          },
+""          keys = {
+""              hide = { "q", "<esc>" },
+""              open_url = { "<cr>" },
+""              select = { "<cr>" },
+""              select_alt = { "s" },
+""              toggle_feature = { "<cr>" },
+""              copy_value = { "yy" },
+""              goto_item = { "gd", "K", "<C-LeftMouse>" },
+""              jump_forward = { "<c-i>" },
+""              jump_back = { "<c-o>", "<C-RightMouse>" },
+""          },
+""      },
+""      src = {
+""          insert_closing_quote = true,
+""          text = {
+""              prerelease = "  pre-release ",
+""              yanked = "  yanked ",
+""          },
+""          coq = {
+""              enabled = false,
+""              name = "Crates",
+""          },
+""      },
+""      null_ls = {
+""          enabled = false,
+""          name = "Crates",
+""      },
+""  }
+""  
+""  END
+""  
+""  nnoremap <silent> <leader>ct :lua require('crates').toggle()<cr>
+""  nnoremap <silent> <leader>cr :lua require('crates').reload()<cr>
+""  
+""  nnoremap <silent> <leader>cv :lua require('crates').show_versions_popup()<cr>
+""  nnoremap <silent> <leader>cf :lua require('crates').show_features_popup()<cr>
+""  nnoremap <silent> <leader>cd :lua require('crates').show_dependencies_popup()<cr>
+""  
+""  nnoremap <silent> <leader>cu :lua require('crates').update_crate()<cr>
+""  vnoremap <silent> <leader>cu :lua require('crates').update_crates()<cr>
+""  nnoremap <silent> <leader>ca :lua require('crates').update_all_crates()<cr>
+""  nnoremap <silent> <leader>cU :lua require('crates').upgrade_crate()<cr>
+""  vnoremap <silent> <leader>cU :lua require('crates').upgrade_crates()<cr>
+""  nnoremap <silent> <leader>cA :lua require('crates').upgrade_all_crates()<cr>
+""  
+""  nnoremap <silent> <leader>cH :lua require('crates').open_homepage()<cr>
+""  nnoremap <silent> <leader>cR :lua require('crates').open_repository()<cr>
+""  nnoremap <silent> <leader>cD :lua require('crates').open_documentation()<cr>
+""  nnoremap <silent> <leader>cC :lua require('crates').open_crates_io()<cr>
+""  
 " " -----------------------------------------------------------------------------------------------}}}
 " " -{{{---- Organisation ----------------------------------------------------------------------------
 " " --------------------------------------------------------------------------------------------------
@@ -917,3 +768,296 @@ command! -nargs=0 RunQtConsole call jobstart("jupyter qtconsole --existing")
 command! -nargs=0 AddFilepathToSyspath call AddFilepathToSyspath()
 
 " -----------------------------------------------------------------------------------------------}}}
+"
+" -----------------------------------------------------------------------------------------------}}}
+" -{{{---- LSP -------------------------------------------------------------------------------------
+" --------------------------------------------------------------------------------------------------
+"
+
+"
+
+"" set completeopt=menuone,noinsert,noselect
+"" 
+"" " Avoid showing extra messages when using completion
+"" set shortmess+=c
+"" 
+""  lua << END
+""  
+""  require("nvim-lsp-installer").setup()
+""  
+""  -- Setup lspconfig.
+""  local on_attach = function(client, bufnr)
+""    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+""    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+""  
+""    --Enable completion triggered by <c-x><c-o>
+""    buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+""  
+""    -- Mappings.
+""    local opts = {
+""          noremap=true,
+""          silent=true,
+""          autoSetHints = true,
+""          hover_with_actions = true,
+""          inlay_hints = {
+""              show_parameter_hints = false,
+""              parameter_hints_prefix = "",
+""              other_hints_prefix = "",
+""          },
+""      }
+""  
+""    -- -- See `:help vim.lsp.*` for documentation on any of the below functions
+""    -- buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+""    -- buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+""    -- buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+""    -- buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+""    -- buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+""    -- buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+""    -- buf_set_keymap('n', '<space>r', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+""    -- buf_set_keymap('n', '<space>a', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+""    -- buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+""    -- buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+""    -- buf_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+""    -- buf_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+""    -- buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.set_loclist()<CR>', opts)
+""    -- buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+""  
+""    -- Get signatures (and _only_ signatures) when in argument lists.
+""    require "lsp_signature".on_attach({
+""      doc_lines = 0,
+""      handler_opts = {
+""        border = "none"
+""      },
+""    })
+""  end
+""  
+""  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+""  
+""  local lspconfig = require'lspconfig'
+""  
+""  -- ---- Rust ---------------------------------------------------------------------------------------
+""  lspconfig.rust_analyzer.setup {
+""    on_attach = on_attach,
+""    flags = {
+""      debounce_text_changes = 150,
+""    },
+""    settings = {
+""      ["rust-analyzer"] = {
+""        cargo = {
+""          allFeatures = true,
+""        },
+""        completion = {
+""  	postfix = {
+""  	  enable = false,
+""  	},
+""        },
+""      },
+""    },
+""    capabilities = capabilities,
+""  }
+""  
+""  local opts = {
+""      tools = { -- rust-tools options
+""      },
+""  
+""      -- all the opts to send to nvim-lspconfig
+""      -- these override the defaults set by rust-tools.nvim
+""      -- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#rust_analyzer
+""      server = {
+""          -- on_attach is a callback called when the language server attachs to the buffer
+""          -- on_attach = on_attach,
+""          settings = {
+""              -- to enable rust-analyzer settings visit:
+""              -- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
+""              ["rust-analyzer"] = {
+""                  -- enable clippy on save
+""                  checkOnSave = {
+""                      command = "clippy"
+""                  },
+""              }
+""          }
+""      },
+""  }
+""  
+""  require('rust-tools').setup(opts)
+""  
+""  -- ---- C++ ----------------------------------------------------------------------------------------
+""  
+""  -- lspconfig.clangd.setup{
+""  --     on_attach=on_attach,
+""  --     capabilities=capabilities,
+""  -- }
+""  
+""  require("clangd_extensions").setup {
+""      server = {
+""        on_attach=on_attach,
+""        capabilities=capabilities,
+""          -- options to pass to nvim-lspconfig
+""          -- i.e. the arguments to require("lspconfig").clangd.setup({})
+""      },
+""      extensions = {
+""          -- defaults:
+""          -- Automatically set inlay hints (type hints)
+""          autoSetHints = true,
+""          -- These apply to the default ClangdSetInlayHints command
+""          inlay_hints = {
+""              -- Only show inlay hints for the current line
+""              only_current_line = false,
+""              -- Event which triggers a refersh of the inlay hints.
+""              -- You can make this "CursorMoved" or "CursorMoved,CursorMovedI" but
+""              -- not that this may cause  higher CPU usage.
+""              -- This option is only respected when only_current_line and
+""              -- autoSetHints both are true.
+""              only_current_line_autocmd = "CursorHold",
+""              -- whether to show parameter hints with the inlay hints or not
+""              show_parameter_hints = true,
+""              -- prefix for parameter hints
+""              parameter_hints_prefix = "<- ",
+""              -- prefix for all the other hints (type, chaining)
+""              other_hints_prefix = "=> ",
+""              -- whether to align to the length of the longest line in the file
+""              max_len_align = false,
+""              -- padding from the left if max_len_align is true
+""              max_len_align_padding = 1,
+""              -- whether to align to the extreme right or not
+""              right_align = false,
+""              -- padding from the right if right_align is true
+""              right_align_padding = 7,
+""              -- The color of the hints
+""              highlight = "Comment",
+""              -- The highlight group priority for extmark
+""              priority = 100,
+""          },
+""          ast = {
+""              -- These are unicode, should be available in any font
+""              role_icons = {
+""                   type = "🄣",
+""                   declaration = "🄓",
+""                   expression = "🄔",
+""                   statement = ";",
+""                   specifier = "🄢",
+""                   ["template argument"] = "🆃",
+""              },
+""              kind_icons = {
+""                  Compound = "🄲",
+""                  Recovery = "🅁",
+""                  TranslationUnit = "🅄",
+""                  PackExpansion = "🄿",
+""                  TemplateTypeParm = "🅃",
+""                  TemplateTemplateParm = "🅃",
+""                  TemplateParamObject = "🅃",
+""              },
+""              --[[ These require codicons (https://github.com/microsoft/vscode-codicons)
+""              role_icons = {
+""                  type = "",
+""                  declaration = "",
+""                  expression = "",
+""                  specifier = "",
+""                  statement = "",
+""                  ["template argument"] = "",
+""              },
+""  
+""              kind_icons = {
+""                  Compound = "",
+""                  Recovery = "",
+""                  TranslationUnit = "",
+""                  PackExpansion = "",
+""                  TemplateTypeParm = "",
+""                  TemplateTemplateParm = "",
+""                  TemplateParamObject = "",
+""              }, ]]
+""  
+""              highlights = {
+""                  detail = "Comment",
+""              },
+""          },
+""          memory_usage = {
+""              border = "none",
+""          },
+""          symbol_info = {
+""              border = "none",
+""          },
+""      },
+""  }
+""  
+""  -- ---- Latex LSP ----------------------------------------------------------------------------------
+""  
+""  lspconfig.texlab.setup{
+""      on_attach=on_attach,
+""      capabilities=capabilities,
+""  }
+""  
+""  -- ---- Python -------------------------------------------------------------------------------------
+""  lspconfig.pyls.setup{
+""      on_attach=on_attach,
+""      capabilities=capabilities,
+""  }
+""  
+""  vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+""    vim.lsp.diagnostic.on_publish_diagnostics, {
+""      virtual_text = true,
+""      signs = true,
+""      update_in_insert = true,
+""    }
+""  )
+""  END
+""  
+""  " ---- Snip Run ------------------------------------------------------------------------------------
+""  
+""  lua << END
+""  
+""  require'sniprun'.setup({selected_interpreters={Python3}})
+""  
+""  local cmp = require'cmp'
+""  cmp.setup({
+""    -- Enable LSP snippets
+""    snippet = {
+""      expand = function(args)
+""          vim.fn["vsnip#anonymous"](args.body)
+""      end,
+""    },
+""    mapping = {
+""      ['<C-p>'] = cmp.mapping.select_prev_item(),
+""      ['<C-n>'] = cmp.mapping.select_next_item(),
+""      -- Add tab support
+""       ["<Tab>"] = cmp.mapping(function(fallback)
+""           if cmp.visible() then
+""               cmp.select_next_item()
+""           else
+""               fallback()
+""           end
+""       end, {"i", "s"}),
+""  
+""       ["<S-Tab>"] = cmp.mapping(function(fallback)
+""           if cmp.visible() then
+""               cmp.select_prev_item()
+""           else
+""               fallback()
+""           end
+""       end, {"i", "s"}),
+""      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+""      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+""      ['<C-Space>'] = cmp.mapping.complete(),
+""      ['<C-e>'] = cmp.mapping.close(),
+""      ['<CR>'] = cmp.mapping.confirm({
+""        behavior = cmp.ConfirmBehavior.Insert,
+""        select = true,
+""      })
+""    },
+""  
+""    -- Installed sources
+""    sources = {
+""      { name = 'nvim_lsp' },
+""      { name = 'vsnip' },
+""      { name = 'path' },
+""      { name = 'buffer' },
+""      { name = 'latex' },
+""      { name = 'orgmode' },
+""    },
+""  })
+""  
+""  
+""  END
+""  " Enable type inlay hints
+""  "autocmd CursorHold,CursorHoldI *.rs :lua require'lsp_extensions'.inlay_hints{ only_current_line = true }
+
