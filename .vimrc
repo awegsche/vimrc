@@ -7,7 +7,6 @@ set hidden
 filetype plugin on
 
 syntax on
-set number relativenumber
 set nu rnu
 
 set nocompatible              " required
@@ -165,13 +164,13 @@ Plugin 'kshenoy/vim-signature'
 
 " -------- REPL 
 " Plugin 'jpalardy/vim-slime'
-Plugin 'untitled-ai/jupyter_ascending.vim'
-Plugin 'bfredl/nvim-ipy'
-Plugin 'hkupty/iron.nvim'
-Plugin 'GCBallesteros/jupytext.vim'
-Plugin 'kana/vim-textobj-line'
-Plugin 'kana/vim-textobj-user'
-Plugin 'GCBallesteros/vim-textobj-hydrogen'
+"Plugin 'untitled-ai/jupyter_ascending.vim'
+"Plugin 'bfredl/nvim-ipy'
+"Plugin 'hkupty/iron.nvim'
+"Plugin 'GCBallesteros/jupytext.vim'
+"Plugin 'kana/vim-textobj-line'
+"Plugin 'kana/vim-textobj-user'
+"Plugin 'GCBallesteros/vim-textobj-hydrogen'
 
 " -------- Latex -----------------------------------------------------------------------------------
 Plugin 'lervag/vimtex'
@@ -364,12 +363,12 @@ nnoremap <silent> gd    <Plug>(coc-definition)
 nnoremap <silent> 1gD   <Plug>(coc-type-definition)
 nnoremap <silent> gr    <Plug>(coc-references)
 nnoremap <silent> gR    <Plug>(coc-rename)
-nnoremap <silent> ga    <Plug>(coc-codeaction-selected)
+nnoremap <silent> ga    <Plug>(coc-codeaction-selected)<CR>
 nnoremap <silent> gA    <Plug>(coc-fix-current)
 nnoremap <silent> gl    <Plug>(coc-codelens-action)
 nnoremap <silent> [d    <Plug>(coc-diagnostic-prev)
 nnoremap <silent> ]d    <Plug>(coc-diagnostic-next)
-nnoremap <silent> F    :call CocActionAsync('format')
+nnoremap <silent> F    :call CocActionAsync('format')<CR>
 " Use <Tab> and <S-Tab> to navigate through popup menu
 " inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
 " inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
@@ -688,63 +687,63 @@ EOF
 " " -----------------------------------------------------------------------------------------------}}}
 " " -{{{---- REPL ------------------------------------------------------------------------------------
 " " --------------------------------------------------------------------------------------------------
-lua << END
----- IRON-REPL ----------------------------------------------------------------
-
-local iron = require("iron.core")
-
-iron.setup {
-  config = {
-    -- Whether a repl should be discarded or not
-    scratch_repl = true,
-    -- Your repl definitions come here
-    repl_definition = {
-      sh = {
-        command = {"zsh"}
-      },
-      python = {
-        command = "pipenv run ipython"
-      }
-    },
-    -- How the repl window will be displayed
-    -- See below for more information
-    repl_open_cmd = require('iron.view').bottom(40),
-  },
-  -- Iron doesn't set keymaps by default anymore.
-  -- You can set them here or manually add keymaps to the functions in iron.core
-  keymaps = {
-    send_motion = "<space>sc",
-    visual_send = "<space>sc",
-    send_file = "<space>sf",
-    send_line = "<space>sl",
-    send_mark = "<space>sm",
-    mark_motion = "<space>mc",
-    mark_visual = "<space>mc",
-    remove_mark = "<space>md",
-    cr = "<space>s<cr>",
-    interrupt = "<space>s<space>",
-    exit = "<space>sq",
-    clear = "<space>cl",
-  },
-  -- If the highlight is on, you can change how it looks
-  -- For the available options, check nvim_set_hl
-  highlight = {
-    italic = true
-  }
-}
-
-vim.cmd [[nnoremap <silent><c-v> <Plug>(iron-visual-send)]]
-vim.cmd [[nnoremap <C-l> <Plug>(iron-send-line)]]
-
----- NVIM-IPY -----------------------------------------------------------------
-
-vim.g.nvim_ipy_perform_mappings = 0
-vim.g.ipy_celldef = '# %%'
-
-vim.cmd [[map <silent><c-s> <Plug>(IPy-Run)]]
-vim.cmd [[map <leader>rc <Plug>(IPy-RunCell)]]
-
-END
+"" "" lua << END
+"" ---- IRON-REPL ----------------------------------------------------------------
+"" 
+"" local iron = require("iron.core")
+"" 
+"" iron.setup {
+""   config = {
+""     -- Whether a repl should be discarded or not
+""     scratch_repl = true,
+""     -- Your repl definitions come here
+""     repl_definition = {
+""       sh = {
+""         command = {"zsh"}
+""       },
+""       python = {
+""         command = "pipenv run ipython"
+""       }
+""     },
+""     -- How the repl window will be displayed
+""     -- See below for more information
+""     repl_open_cmd = require('iron.view').bottom(40),
+""   },
+""   -- Iron doesn't set keymaps by default anymore.
+""   -- You can set them here or manually add keymaps to the functions in iron.core
+""   keymaps = {
+""     send_motion = "<space>sc",
+""     visual_send = "<space>sc",
+""     send_file = "<space>sf",
+""     send_line = "<space>sl",
+""     send_mark = "<space>sm",
+""     mark_motion = "<space>mc",
+""     mark_visual = "<space>mc",
+""     remove_mark = "<space>md",
+""     cr = "<space>s<cr>",
+""     interrupt = "<space>s<space>",
+""     exit = "<space>sq",
+""     clear = "<space>cl",
+""   },
+""   -- If the highlight is on, you can change how it looks
+""   -- For the available options, check nvim_set_hl
+""   highlight = {
+""     italic = true
+""   }
+"" }
+"" 
+"" vim.cmd [[nnoremap <silent><c-v> <Plug>(iron-visual-send)]]
+"" vim.cmd [[nnoremap <C-l> <Plug>(iron-send-line)]]
+"" 
+"" ---- NVIM-IPY -----------------------------------------------------------------
+"" 
+"" vim.g.nvim_ipy_perform_mappings = 0
+"" vim.g.ipy_celldef = '# %%'
+"" 
+"" vim.cmd [[map <silent><c-s> <Plug>(IPy-Run)]]
+"" vim.cmd [[map <leader>rc <Plug>(IPy-RunCell)]]
+"" 
+"" END
 
 function! GetKernelFromPipenv()
     let a:kernel = tolower(system('basename $(pipenv --venv)'))
