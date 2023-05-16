@@ -125,6 +125,8 @@ Plugin 'tpope/vim-fugitive'
 " ---- instead, use CoC ----------------------------------------------------------------------------
 Plugin 'neoclide/coc.nvim'
 Plugin 'williamboman/nvim-lsp-installer'
+" ---- cod completion ------------------------------------------------------------------------------
+Plugin 'Exafunction/codeium.vim'
 " --------------------------------------------------------------------------------------------------
 Plugin 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
 Plugin 'hrsh7th/cmp-buffer', {'branch': 'main'}
