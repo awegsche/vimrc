@@ -34,7 +34,7 @@ if has('linux')
     set guifont=Fira\ Code:h2
 endif
 if has('win32')
-    set guifont=Fira\ Code:h10
+    set guifont=Iosevka\ Term\ SS05:h8
 endif
 
 
